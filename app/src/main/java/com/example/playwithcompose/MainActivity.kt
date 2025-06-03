@@ -3,7 +3,10 @@ package com.example.playwithcompose
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -16,8 +19,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -29,9 +37,15 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.playwithcompose.ui.theme.PlayWithComposeTheme
 
 class MainActivity : ComponentActivity() {
@@ -71,7 +85,7 @@ fun OnboardingScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text(text = "Welcome to the Basics Codelab!")
+        Text(text = stringResource(R.string.welcome_onboarding_message))
         Spacer(modifier = Modifier.height(8.dp))
         // TODO: Buttons with the app theme should be reused in a Composable
         Button(
@@ -84,7 +98,7 @@ fun OnboardingScreen(
                 onContinueClicked()
             }
         ) {
-            Text(text = "Continue")
+            Text(text = stringResource(R.string.continue_to_greetings))
         }
     }
 }
@@ -99,11 +113,14 @@ fun GreetingScreen(
             .padding(4.dp)
     ) {
         items(greetings) { greeting ->
-            GreetingCard(
-                modifier = Modifier.fillMaxWidth(),
-                name = greeting.toString()
-            )
-            Spacer(modifier = Modifier.height(8.dp))
+            Column {
+                GreetingCard(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 4.dp),
+                    name = greeting.toString()
+                )
+            }
         }
     }
 }
@@ -111,36 +128,47 @@ fun GreetingScreen(
 @Composable
 fun GreetingCard(
     modifier: Modifier = Modifier,
-    name: String
+    name: String,
 ) {
-    var buttonText by rememberSaveable { mutableStateOf("Show more") }
-    var extraPadding by rememberSaveable { mutableIntStateOf(0) }
+    var isExpanded by rememberSaveable { mutableStateOf(false) }
 
-    val animatedPadding by animateDpAsState(
-        targetValue = extraPadding.dp
-    )
-
-    Row(modifier = modifier
-        .background(MaterialTheme.colorScheme.primary)
-        .padding(24.dp)
+    Column(
+        modifier = modifier
+            .shadow(32.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .background(MaterialTheme.colorScheme.primary)
+            .animateContentSize(
+                animationSpec = spring(
+                    dampingRatio = Spring.DampingRatioMediumBouncy,
+                    stiffness = Spring.StiffnessLow
+                )
+            )
+            .padding(32.dp)
     ) {
-        Greeting(
-            modifier = Modifier.weight(1f),
-            name = name
-        )
-        Button(
-            modifier = Modifier.padding(bottom = animatedPadding),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.onPrimary,
-                contentColor = MaterialTheme.colorScheme.primary
-            ),
-            shape = RoundedCornerShape(4.dp),
-            onClick = {
-                buttonText = if (buttonText == "Show more") "Show less" else "Show more"
-                extraPadding = if (extraPadding == 0) 48 else 0
+        Row {
+            Greeting(
+                modifier = Modifier.weight(1f),
+                name = name
+            )
+            IconButton(
+                onClick = {
+                    isExpanded = !isExpanded
+                }
+            ) {
+                Icon(
+                    imageVector = if (isExpanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
+                    contentDescription = stringResource(R.string.expand),
+                    tint = MaterialTheme.colorScheme.onPrimary
+                )
             }
-        ) {
-            Text(text = buttonText)
+        }
+        if (isExpanded) {
+            Text(
+                modifier = modifier.padding(4.dp),
+                text = "Filler \ntext \nin \nhere\n...",
+                fontSize = 12.sp,
+                color = MaterialTheme.colorScheme.onPrimary
+            )
         }
     }
 }
@@ -153,11 +181,13 @@ fun Greeting(
 ) {
     Column(modifier = modifier) {
         Text(
-            text = "Hello",
+            text = stringResource(R.string.hello),
             color = color
         )
         Text(
-            text = "$name!",
+            text = name,
+            fontWeight = FontWeight.Bold,
+            fontSize = 32.sp,
             color = color
         )
     }
