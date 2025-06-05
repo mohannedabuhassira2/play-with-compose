@@ -1,5 +1,6 @@
 package com.example.playwithcompose
 
+import android.content.res.Configuration
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -34,6 +36,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationRail
+import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -48,6 +52,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -188,10 +193,7 @@ fun HomeScreenBottomNavigation(
 ) {
     var clickedItemIndex by rememberSaveable { mutableIntStateOf(0) }
 
-    NavigationBar(
-        modifier = modifier,
-        containerColor = MaterialTheme.colorScheme.background
-    ) {
+    NavigationBar(modifier = modifier) {
         NavigationBarItem(
             selected = clickedItemIndex == 0,
             onClick = {
@@ -225,10 +227,61 @@ fun HomeScreenBottomNavigation(
     }
 }
 
+// For bigger projects, we should host this in a separate file
+// that connects all the screens together.
+@Composable
+fun HomeScreenNavigationRail(
+    modifier: Modifier = Modifier
+) {
+    var clickedItemIndex by rememberSaveable { mutableIntStateOf(0) }
+
+    NavigationRail {
+        Column (
+            modifier = modifier
+                .fillMaxHeight()
+                .background(color = MaterialTheme.colorScheme.surfaceContainer),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            NavigationRailItem(
+                selected = clickedItemIndex == 0,
+                onClick = {
+                    clickedItemIndex = 0
+                },
+                icon = {
+                    Icon(
+                        imageVector = Icons.Default.Home,
+                        contentDescription = null
+                    )
+                },
+                label = {
+                    Text(text = "Home")
+                }
+            )
+            Spacer(modifier = modifier.height(8.dp))
+            NavigationRailItem(
+                selected = clickedItemIndex == 1,
+                onClick = {
+                    clickedItemIndex = 1
+                },
+                icon = {
+                    Icon(
+                        imageVector = Icons.Default.AccountCircle,
+                        contentDescription = null
+                    )
+                },
+                label = {
+                    Text(text = "Profile")
+                }
+            )
+        }
+    }
+}
+
 // TODO: Refactor the code here
 @Composable
 fun HomeScreenContent(
-    padding: PaddingValues
+    padding: PaddingValues = PaddingValues(0.dp)
 ) {
     Column(
         modifier = Modifier
@@ -314,13 +367,35 @@ fun HomeScreenContent(
 }
 
 @Composable
-fun HomeScreen() {
+fun HomeScreenPortrait() {
     Scaffold(
         bottomBar = {
             HomeScreenBottomNavigation()
         }
     ) { padding ->
         HomeScreenContent(padding = padding)
+    }
+}
+
+@Composable
+fun HomeScreenLandscape() {
+    Row {
+        HomeScreenNavigationRail()
+        HomeScreenContent()
+    }
+}
+
+@Composable
+fun HomeScreen() {
+    val configuration = LocalConfiguration.current
+
+    when (configuration.orientation) {
+        Configuration.ORIENTATION_PORTRAIT -> {
+            HomeScreenPortrait()
+        }
+        else -> {
+            HomeScreenLandscape()
+        }
     }
 }
 
@@ -443,8 +518,24 @@ fun HomeScreenBottomNavigationPreview() {
 
 @Preview(showBackground = true)
 @Composable
+fun HomeScreenNavigationRailPreview() {
+    AppTheme {
+        HomeScreenNavigationRail()
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
 fun HomeScreenPreview() {
     AppTheme {
-        HomeScreen()
+        HomeScreenPortrait()
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun HomeScreenLandscapePreview() {
+    AppTheme {
+        HomeScreenLandscape()
     }
 }
