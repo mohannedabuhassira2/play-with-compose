@@ -1,3 +1,3 @@
-package com.example.playwithcompose.ui.theme.model
+package com.example.playwithcompose.ui.model
 
 data class WellnessTask(val id: Int, val label: String)
