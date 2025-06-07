@@ -20,5 +20,5 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "Play with compose"
-include(":app")
+include(":Playground")
  
