@@ -4,4 +4,6 @@
     <string name="hello">Hello</string>
     <string name="continue_to_greetings">Continue</string>
     <string name="welcome_onboarding_message">Welcome to the Basics Codelab!</string>
+    <string name="completed">completed</string>
+    <string name="pending">⌛ Pending</string>
 </resources>

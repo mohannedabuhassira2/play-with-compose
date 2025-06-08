@@ -8,4 +8,7 @@ import retrofit2.http.Path
 interface TodoService {
     @GET("todos/{id}")
     suspend fun getTodo(@Path("id") id: Long): Response<Todo>
+
+    @GET("todos")
+    suspend fun getTodos(): Response<List<Todo>>
 }
