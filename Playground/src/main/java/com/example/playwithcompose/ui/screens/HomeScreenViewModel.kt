@@ -7,6 +7,7 @@ import com.example.playwithcompose.data.networking.model.Todo
 import com.example.playwithcompose.domain.Repository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -14,12 +15,13 @@ import javax.inject.Inject
 class HomeScreenViewModel @Inject constructor(
     private val repository: Repository
 ) : ViewModel() {
-    val todoState = MutableStateFlow<ApiResult<Todo>>(ApiResult.Progress)
+    private val _todoState = MutableStateFlow<ApiResult<Todo>>(ApiResult.Progress)
+    val todoState: StateFlow<ApiResult<Todo>> = _todoState
 
     fun getTodo(id: Long) {
         viewModelScope.launch {
             val result = repository.getTodo(id)
-            todoState.value = result
+            _todoState.value = result
         }
     }
 }
